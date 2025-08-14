@@ -14,6 +14,8 @@ interface UploadResult {
   originalName: string;
   fileSize: number;
   viewableUrl: string;
+  senderName?: string | null;
+  senderEmail?: string | null;
 }
 
 export default function VideoUpload() {
@@ -23,6 +25,8 @@ export default function VideoUpload() {
   const [uploadResult, setUploadResult] = useState<UploadResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [senderName, setSenderName] = useState('');
+  const [senderEmail, setSenderEmail] = useState('');
   
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -86,6 +90,12 @@ export default function VideoUpload() {
     setIsUploading(true);
     setError(null);
     setUploadResult(null);
+    // Basic validation for sender email if provided
+    if (senderEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(senderEmail)) {
+      setError('Please enter a valid email address for Sender Email.');
+      setIsUploading(false);
+      return;
+    }
     
     const progressInterval = simulateProgress();
 
@@ -129,6 +139,8 @@ export default function VideoUpload() {
           key,
           originalName: selectedFile.name,
           fileSize: selectedFile.size,
+          senderName: senderName || undefined,
+          senderEmail: senderEmail || undefined,
         }),
       });
 
@@ -143,6 +155,8 @@ export default function VideoUpload() {
       setUploadResult(result);
       setSelectedFile(null);
       if (fileInputRef.current) fileInputRef.current.value = '';
+      setSenderName('');
+      setSenderEmail('');
 
     } catch (err) {
       clearInterval(progressInterval);
@@ -167,6 +181,8 @@ export default function VideoUpload() {
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
+    setSenderName('');
+    setSenderEmail('');
   };
 
   return (
@@ -179,6 +195,30 @@ export default function VideoUpload() {
       {/* Upload Area */}
       <Card className="mb-6">
         <CardContent className="p-6">
+          {/* Sender info */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Sender Name</label>
+              <input
+                type="text"
+                value={senderName}
+                onChange={(e) => setSenderName(e.target.value)}
+                placeholder="Your name"
+                className="w-full border rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-300"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Sender Email</label>
+              <input
+                type="email"
+                value={senderEmail}
+                onChange={(e) => setSenderEmail(e.target.value)}
+                placeholder="you@example.com"
+                className="w-full border rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-300"
+              />
+            </div>
+          </div>
+
           <div
             className={`
               border-2 border-dashed rounded-lg p-8 text-center transition-colors
@@ -285,8 +325,16 @@ export default function VideoUpload() {
                 <span className="font-medium">Size:</span> {formatFileSize(uploadResult.fileSize)}
               </p>
               <p className="text-sm">
-                <span className="font-medium">Status:</span> Email notification sent
+                <span className="font-medium">Status:</span> Notification sent
               </p>
+              {(uploadResult.senderName || uploadResult.senderEmail) && (
+                <p className="text-sm">
+                  <span className="font-medium">Sender:</span>{' '}
+                  {[uploadResult.senderName, uploadResult.senderEmail]
+                    .filter(Boolean)
+                    .join(' <') + (uploadResult.senderEmail ? '>' : '')}
+                </p>
+              )}
             </div>
 
             <div className="flex gap-3">

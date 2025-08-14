@@ -1,75 +1,22 @@
 
 import { NextRequest, NextResponse } from 'next/server';
-import { uploadToS3, generatePresignedUrl } from '@/lib/aws';
-import { sendVideoUploadNotification } from '@/lib/email';
-import { generateUniqueFileName, validateVideoFile } from '@/lib/upload-utils';
+// Note: This endpoint handled multipart uploads to the server using Node APIs
+// (Buffer, streaming). Cloudflare Pages (Next on Pages) requires Edge runtime
+// for API routes, which does not support Node APIs or server-side file parsing.
+// We disable this route and guide clients to use the presigned upload flow.
+
+export const runtime = 'edge';
 
 export async function POST(request: NextRequest) {
-  try {
-    const formData = await request.formData();
-    const file = formData.get('file') as File;
-
-    if (!file) {
-      return NextResponse.json(
-        { error: 'No file provided' },
-        { status: 400 }
-      );
-    }
-
-    // Create a temporary File object for validation
-    const tempFile = new File([await file.arrayBuffer()], file.name, {
-      type: file.type,
-    });
-
-    // Validate file type
-    const validation = validateVideoFile(tempFile);
-    if (!validation.isValid) {
-      return NextResponse.json(
-        { error: validation.error },
-        { status: 400 }
-      );
-    }
-
-    // Generate unique filename
-    const uniqueFileName = generateUniqueFileName(file.name);
-
-    // Convert file to buffer for S3 upload
-    const buffer = Buffer.from(await file.arrayBuffer());
-
-    // Upload to S3
-    const uploadResult = await uploadToS3(buffer, uniqueFileName, file.type);
-
-    // Generate presigned URL for viewing
-    const presignedUrl = await generatePresignedUrl(uniqueFileName, 3600); // 1 hour
-
-    // Send email notification
-    try {
-      await sendVideoUploadNotification(
-        file.name,
-        file.size,
-        presignedUrl
-      );
-    } catch (emailError) {
-      console.error('Email notification failed:', emailError);
-      // Don't fail the upload if email fails
-    }
-
-    return NextResponse.json({
-      message: 'File uploaded successfully',
-      fileName: uniqueFileName,
-      originalName: file.name,
-      fileSize: file.size,
-      viewableUrl: presignedUrl,
-      s3Location: uploadResult?.Location || '',
-    });
-
-  } catch (error) {
-    console.error('Upload error:', error);
-    return NextResponse.json(
-      { error: 'Upload failed. Please try again.' },
-      { status: 500 }
-    );
-  }
+  return NextResponse.json(
+    {
+      error:
+        'Direct server uploads are disabled on Cloudflare Pages. Use the presigned upload flow via /app/api/presigned-upload instead.',
+    },
+    { status: 405 }
+  );
 }
 
-// Note: In App Router, bodyParser is handled differently and doesn't need explicit config
+// Note: For Cloudflare Pages, clients should call `/app/api/presigned-upload` to get a
+// presigned S3 URL, then upload directly to S3 from the browser, and optionally call
+// `/app/api/notify` afterwards.

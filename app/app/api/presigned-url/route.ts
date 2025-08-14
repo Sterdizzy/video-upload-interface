@@ -2,6 +2,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { generatePresignedUrl } from '@/lib/aws';
 
+export const runtime = 'edge';
+
 export async function POST(request: NextRequest) {
   try {
     const { fileName, expiresIn = 3600 } = await request.json();

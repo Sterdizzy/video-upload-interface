@@ -39,3 +39,8 @@ next-env.d.ts
 
 # OS
 Thumbs.db
+
+# Cloudflare Pages
+.wrangler/
+_worker.js
+*.js.map

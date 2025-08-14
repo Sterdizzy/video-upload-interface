@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { generateUniqueFileName } from '@/lib/upload-utils';
 import { generatePresignedUploadUrl } from '@/lib/aws';
 
+export const runtime = 'edge';
+
 export async function POST(request: NextRequest) {
   try {
     const { fileName, contentType } = await request.json();

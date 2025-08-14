@@ -4,6 +4,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "pages:build": "npm run build && npx @cloudflare/next-on-pages", 
     "start": "next start",
     "lint": "next lint"
   },
@@ -11,6 +12,7 @@
     "seed": "tsx --require dotenv/config scripts/seed.ts"
   },
   "devDependencies": {
+    "@cloudflare/next-on-pages": "^1.13.13",
     "@next/swc-wasm-nodejs": "13.5.1",
     "@types/formidable": "^3",
     "@types/node": "20.6.2",

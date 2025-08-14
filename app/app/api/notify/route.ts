@@ -2,9 +2,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import { generatePresignedUrl } from '@/lib/aws';
 import { sendVideoUploadNotification } from '@/lib/email';
 
+export const runtime = 'edge';
+
 export async function POST(request: NextRequest) {
   try {
-    const { key, originalName, fileSize } = await request.json();
+    const { key, originalName, fileSize, senderName, senderEmail } = await request.json();
 
     if (!key || !originalName || typeof fileSize !== 'number') {
       return NextResponse.json(
@@ -15,11 +17,17 @@ export async function POST(request: NextRequest) {
 
     const viewableUrl = await generatePresignedUrl(key, 3600);
 
+    // Send notification via Edge-compatible email provider
     try {
-      await sendVideoUploadNotification(originalName, fileSize, viewableUrl);
+      await sendVideoUploadNotification(
+        originalName,
+        fileSize,
+        viewableUrl,
+        senderName,
+        senderEmail
+      );
     } catch (emailError) {
-      console.error('Email notification failed:', emailError);
-      // do not fail the request on email issues
+      console.warn('Email notification failed (non-fatal):', emailError);
     }
 
     return NextResponse.json({
@@ -28,6 +36,8 @@ export async function POST(request: NextRequest) {
       originalName,
       fileSize,
       viewableUrl,
+      senderName: senderName || null,
+      senderEmail: senderEmail || null,
     });
   } catch (error) {
     console.error('Error in notify route:', error);
