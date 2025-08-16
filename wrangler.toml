@@ -1,3 +1,0 @@
- # Cloudflare Pages (Git builds) reads this key to locate the static output
- # produced by @cloudflare/next-on-pages.
- pages_build_output_dir = ".vercel/output/static"
