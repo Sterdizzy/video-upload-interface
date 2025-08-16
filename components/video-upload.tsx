@@ -188,8 +188,8 @@ export default function VideoUpload() {
   return (
     <div className="w-full max-w-2xl mx-auto p-6">
       <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Video Upload Interface</h1>
-        <p className="text-gray-600">Upload MP4, AVI, and MOV files to S3 storage with automatic email notifications</p>
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">Client Video Upload Interface</h1>
+        <p className="text-gray-600">Upload MP4, AVI, and MOV files.</p>
       </div>
 
       {/* Upload Area */}
