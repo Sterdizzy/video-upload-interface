@@ -1,4 +1,3 @@
-
 // Edge-compatible email using Resend API (https://resend.com)
 // Requires RESEND_API_KEY and EMAIL_TO in environment variables.
 
@@ -9,22 +8,29 @@ export async function sendVideoUploadNotification(
   senderName?: string,
   senderEmail?: string
 ) {
-  const apiKey = process.env.RESEND_API_KEY;
-  const to = process.env.EMAIL_TO || '';
-  const from = process.env.EMAIL_FROM || 'uploads@no-reply.example';
+  console.log('Attempting to send video upload notification...');
 
-  if (!apiKey || !to) {
-    console.warn('Email disabled: missing RESEND_API_KEY or EMAIL_TO');
-    return { id: 'skip', message: 'Email disabled (missing config)' };
+  const apiKey = process.env.RESEND_API_KEY;
+  const to = process.env.EMAIL_TO;
+  const from = process.env.EMAIL_FROM || 'onboarding@resend.dev'; // Resend requires a verified domain or this default for testing
+
+  if (!apiKey) {
+    console.error('Email failed: RESEND_API_KEY is not set.');
+    return { error: 'Email server RESEND_API_KEY not configured.' };
+  }
+  if (!to) {
+    console.error('Email failed: EMAIL_TO is not set.');
+    return { error: 'Email recipient EMAIL_TO not configured.' };
   }
 
+  console.log(`Email configured for To: ${to}, From: ${from}`);
+
+  const subject = `Video Upload Successful: ${fileName}`;
   const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
       <h2 style="color: #333;">Video Upload Successful</h2>
-      <p>Your video has been successfully uploaded to S3.</p>
-      ${senderName || senderEmail ? `<p><strong>Sender:</strong> ${
-        [senderName, senderEmail].filter(Boolean).join(' <') + (senderEmail ? '>' : '')
-      }</p>` : ''}
+      <p>A video has been successfully uploaded.</p>
+      ${senderName || senderEmail ? `<p><strong>Sender:</strong> ${[senderName, senderEmail].filter(Boolean).join(' &lt;')}</strong></p>` : ''}
       <div style="background-color: #f5f5f5; padding: 15px; border-radius: 5px; margin: 20px 0;">
         <h3 style="margin-top: 0;">File Details:</h3>
         <p><strong>File Name:</strong> ${fileName}</p>
@@ -41,30 +47,30 @@ export async function sendVideoUploadNotification(
       <p style="color: #666; font-size: 14px;">
         Note: The viewable link will expire in 1 hour for security purposes.
       </p>
-    </div>
-  `;
+    </div>`;
 
-  const res = await fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${apiKey}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      from,
-      to,
-      subject: `Video Upload Complete: ${fileName}`,
-      html,
-      reply_to: senderEmail || undefined,
-    }),
-  });
+  try {
+    console.log('Sending email via Resend API...');
+    const response = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({ from, to, subject, html }),
+    });
 
-  if (!res.ok) {
-    const text = await res.text();
-    console.error('Resend email error:', res.status, text);
-    throw new Error(`Email failed: ${res.status}`);
+    const data = await response.json();
+
+    if (!response.ok) {
+      console.error('Resend API returned an error:', data);
+      return { error: 'Failed to send email.', details: data };
+    }
+
+    console.log('Email sent successfully via Resend:', data);
+    return data;
+  } catch (error) {
+    console.error('An unexpected error occurred while sending email:', error);
+    return { error: 'An unexpected error occurred.', details: error };
   }
-
-  const data = await res.json().catch(() => ({}));
-  return data;
 }
