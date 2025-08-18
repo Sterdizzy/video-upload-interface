@@ -90,8 +90,15 @@ export default function VideoUpload() {
     setIsUploading(true);
     setError(null);
     setUploadResult(null);
-    // Basic validation for sender email if provided
-    if (senderEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(senderEmail)) {
+    // Require sender name and email
+    if (!senderName || !senderEmail) {
+      setError('Please fill out both Sender Name and Sender Email.');
+      setIsUploading(false);
+      return;
+    }
+    
+    // Validate email format
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(senderEmail)) {
       setError('Please enter a valid email address for Sender Email.');
       setIsUploading(false);
       return;
@@ -198,22 +205,28 @@ export default function VideoUpload() {
           {/* Sender info */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Sender Name</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Sender Name <span className="text-red-500">*</span>
+              </label>
               <input
                 type="text"
                 value={senderName}
                 onChange={(e) => setSenderName(e.target.value)}
                 placeholder="Your name"
+                required
                 className="w-full border rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-300"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Sender Email</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Sender Email <span className="text-red-500">*</span>
+              </label>
               <input
                 type="email"
                 value={senderEmail}
                 onChange={(e) => setSenderEmail(e.target.value)}
                 placeholder="you@example.com"
+                required
                 className="w-full border rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-300"
               />
             </div>

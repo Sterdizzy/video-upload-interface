@@ -17,7 +17,7 @@ const corsConfiguration = {
       AllowedOrigins: [
         'http://localhost:3000',
         'http://127.0.0.1:3000',
-        'https://your-domain.com'
+        'https://videos.factsbuilt.com'
       ],
       AllowedMethods: [
         'GET',
