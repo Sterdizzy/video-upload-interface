@@ -15,15 +15,15 @@ export async function sendVideoUploadNotification(
   const from = process.env.EMAIL_FROM || 'onboarding@resend.dev'; // Resend requires a verified domain or this default for testing
 
   if (!apiKey) {
-    console.error('Email failed: RESEND_API_KEY is not set.');
+    console.error('Email failed: RESEND_API_KEY is not set. Available env vars:', Object.keys(process.env).filter(k => k.includes('EMAIL') || k.includes('RESEND')));
     return { error: 'Email server RESEND_API_KEY not configured.' };
   }
   if (!to) {
-    console.error('Email failed: EMAIL_TO is not set.');
+    console.error('Email failed: EMAIL_TO is not set. Available env vars:', Object.keys(process.env).filter(k => k.includes('EMAIL') || k.includes('RESEND')));
     return { error: 'Email recipient EMAIL_TO not configured.' };
   }
 
-  console.log(`Email configured for To: ${to}, From: ${from}`);
+  console.log(`Email configured for To: ${to}, From: ${from}, API Key starts with: ${apiKey.substring(0, 10)}...`);
 
   const subject = `Video Upload Successful: ${fileName}`;
   const html = `
@@ -39,14 +39,13 @@ export async function sendVideoUploadNotification(
       </div>
       <div style="text-align: center; margin: 30px 0;">
         <a href="${viewableUrl}" 
-           style="background-color: #007bff; color: white; padding: 12px 24px; 
-                  text-decoration: none; border-radius: 5px; display: inline-block;">
-          View Video
+           style="background-color: #dc3545; color: #ffffff !important; padding: 15px 30px; 
+                  text-decoration: none; border-radius: 8px; display: inline-block;
+                  font-weight: bold; font-size: 18px; border: 3px solid #ffffff;
+                  box-shadow: 0 4px 8px rgba(0,0,0,0.2); text-shadow: 1px 1px 2px rgba(0,0,0,0.5);">
+          🎥 VIEW VIDEO
         </a>
       </div>
-      <p style="color: #666; font-size: 14px;">
-        Note: The viewable link will expire in 1 hour for security purposes.
-      </p>
     </div>`;
 
   try {

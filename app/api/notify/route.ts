@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const viewableUrl = await generatePresignedUrl(key, 3600);
+    const viewableUrl = await generatePresignedUrl(key, 604800);
 
     // Send notification via Edge-compatible email provider
     try {

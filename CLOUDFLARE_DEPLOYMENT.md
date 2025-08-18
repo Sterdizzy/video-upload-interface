@@ -34,26 +34,33 @@ git push -u origin main
    - Select your video upload repository
 5. **Configure build settings**:
    - **Framework preset**: Next.js
-   - **Build command**: `npm run build`
+   - **Build command**: `npm run pages:build`
    - **Build output directory**: `.next`
-   - **Root directory**: `/app` (if your Next.js app is in the app folder)
+   - **Root directory**: (leave empty - project is in root)
 
 ### 3. Set Environment Variables
 
 In your Cloudflare Pages project settings, add these environment variables:
 
+#### Required Variables:
 ```
 AWS_REGION=us-east-1
 AWS_ACCESS_KEY_ID=your_access_key_here
 AWS_SECRET_ACCESS_KEY=your_secret_key_here
-S3_BUCKET_NAME=csc-media-82828id98u884nfkwp937
-SMTP_HOST=smtp.gmail.com
-SMTP_PORT=587
-SMTP_USER=your_email@gmail.com
-SMTP_PASS=your_app_password
-EMAIL_FROM=your_email@gmail.com
-EMAIL_TO=recipient@example.com
+S3_BUCKET_NAME=your_s3_bucket_name_here
+
+# Email Configuration (using Resend)
+RESEND_API_KEY=your_resend_api_key_here
+EMAIL_FROM=onboarding@resend.dev
+EMAIL_TO=support@influenceology.com
 ```
+
+#### How to add environment variables in Cloudflare Pages:
+1. Go to your Pages project dashboard
+2. Click **Settings** tab
+3. Click **Environment variables** 
+4. Click **Add variable** for each variable above
+5. Set environment for **Production** and **Preview** (both)
 
 ### 4. Update CORS Configuration
 
