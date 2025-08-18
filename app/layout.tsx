@@ -8,7 +8,7 @@ const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
   title: 'Video Upload Interface',
-  description: 'Professional video upload interface for S3 storage with email notifications',
+  description: 'Video upload interface',
 };
 
 export default function RootLayout({
